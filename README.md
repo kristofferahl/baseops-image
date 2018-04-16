@@ -1,6 +1,6 @@
 # BaseOps
 
-Base of operations. Lightweight DevOps container based on alpine.
+Base of operations. A DevOps container based on alpine.
 
 ## Features
 
