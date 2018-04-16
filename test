@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+docker run --rm -it \
+  -v ${PWD:?}:/src \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  --entrypoint /src/baseops.test \
+  kristofferahl/baseops:latest
+
+echo "Exit code: $?"

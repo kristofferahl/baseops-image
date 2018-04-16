@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+docker build -t kristofferahl/baseops:0.1.0 "$@" .
+docker tag kristofferahl/baseops:0.1.0 kristofferahl/baseops:latest
