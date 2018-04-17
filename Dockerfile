@@ -2,10 +2,12 @@ FROM alpine:3.7
 
 LABEL maintainer="Kristoffer Ahl kristoffer.ahl@dotnetmentor.se"
 
-ENV ONEPASSWORD_VERSION=v0.4
-ENV TERRAFORM_VERSION=0.11.7
-ENV DIG_VERSION=9.10.2
-ENV AWS_MFA_WORK_DIR=/work/
+ARG ONEPASSWORD_VERSION=v0.4
+ARG TERRAFORM_VERSION=0.11.7
+ARG DIG_VERSION=9.10.2
+ARG WORK_DIR=/work/
+
+ENV AWS_MFA_WORK_DIR=${WORK_DIR}
 
 RUN apk --no-cache add \
   bash \
@@ -42,5 +44,5 @@ RUN mkdir -p /var/lib/aws-mfa && \
 RUN mkdir -p /root/.op/
 RUN chown -R $USER:$(id -gn $USER) /root/.op/
 
-RUN mkdir -p /work
-WORKDIR /work
+RUN mkdir -p ${WORK_DIR}
+WORKDIR ${WORK_DIR}
