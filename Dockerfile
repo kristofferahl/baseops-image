@@ -2,7 +2,6 @@ FROM alpine:3.7
 
 LABEL maintainer="Kristoffer Ahl kristoffer.ahl@dotnetmentor.se"
 
-ARG ONEPASSWORD_VERSION=v0.4
 ARG TERRAFORM_VERSION=0.11.7
 ARG DIG_VERSION=9.10.2
 ARG WORK_DIR=/work/
@@ -25,12 +24,6 @@ RUN curl -L https://github.com/sequenceiq/docker-alpine-dig/releases/download/v$
 RUN pip install --upgrade pip && \
   pip install awscli && \
   pip install docker-compose
-
-RUN curl https://cache.agilebits.com/dist/1P/op/pkg/${ONEPASSWORD_VERSION}/op_linux_386_${ONEPASSWORD_VERSION}.zip -o op.zip && \
-  unzip op.zip && \
-  chmod +x op && \
-  mv op /usr/bin && \
-  rm -rf op.zip op.sig
 
 RUN curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o terraform.zip && \
   unzip terraform.zip && \
