@@ -1,29 +1,21 @@
-FROM alpine:3.7
-
+FROM alpine:3.11.3
 LABEL maintainer="Kristoffer Ahl kristoffer.ahl@dotnetmentor.se"
 
-ARG TERRAFORM_VERSION=0.11.7
-ARG DIG_VERSION=9.10.2
 ARG WORK_DIR=/work/
-
-ENV AWS_MFA_WORK_DIR=${WORK_DIR}
+ARG TERRAFORM_VERSION=0.12.20
+ARG DIG_VERSION=9.10.2
+ARG DOCKER_COMPOSE_VERSION=1.25.4
 
 RUN apk --no-cache add \
   bash \
-  jq \
+  tar \
   curl \
-  git \
-  docker \
-  python \
-  py-pip \
+  jq \
   groff \
-  tar
+  git \
+  docker
 
 RUN curl -L https://github.com/sequenceiq/docker-alpine-dig/releases/download/v${DIG_VERSION}/dig.tgz | tar -xzv -C /usr/local/bin/
-
-RUN pip install --upgrade pip && \
-  pip install awscli && \
-  pip install docker-compose
 
 RUN curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o terraform.zip && \
   unzip terraform.zip && \
@@ -31,11 +23,17 @@ RUN curl https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform
   mv terraform /usr/bin && \
   rm -rf terraform.zip
 
-RUN mkdir -p /var/lib/aws-mfa && \
-  curl https://raw.githubusercontent.com/kristofferahl/aws-mfa/master/aws-mfa.sh > /var/lib/aws-mfa/aws-mfa.sh
+RUN apk add --no-cache python2 \
+  && apk add --no-cache --virtual .docker-compose-deps \
+  py-pip python-dev libffi-dev openssl-dev gcc libc-dev make \
+  && pip install docker-compose==${DOCKER_COMPOSE_VERSION} \
+  && apk del .docker-compose-deps
 
-RUN mkdir -p /root/.op/
-RUN chown -R $USER:$(id -gn $USER) /root/.op/
+RUN apk add --no-cache python2 \
+  && apk add --no-cache --virtual .aws-cli-deps \
+  py-pip python-dev libffi-dev openssl-dev gcc libc-dev make \
+  && pip install awscli \
+  && apk del .aws-cli-deps
 
 RUN mkdir -p ${WORK_DIR}
 WORKDIR ${WORK_DIR}

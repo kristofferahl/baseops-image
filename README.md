@@ -4,8 +4,7 @@ Base of operations. A DevOps container based on alpine.
 
 ## Features
 
-- aws (cli)
-- [aws-mfa](https://github.com/kristofferahl/aws-mfa)
+- aws cli
 - bash
 - curl
 - docker
