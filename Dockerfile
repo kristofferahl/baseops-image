@@ -2,7 +2,7 @@ FROM alpine:3.11.3
 LABEL maintainer="Kristoffer Ahl kristoffer.ahl@dotnetmentor.se"
 
 ARG WORK_DIR=/work/
-ARG TERRAFORM_VERSION=0.12.21
+ARG TERRAFORM_VERSION=0.13.7
 ARG DIG_VERSION=9.10.2
 
 RUN apk --no-cache add \
@@ -29,5 +29,7 @@ RUN apk add --no-cache python2 \
   && pip install awscli \
   && apk del .aws-cli-deps
 
+COPY ./baseops-versions /usr/local/bin/
+RUN chmod +x /usr/local/bin/baseops-versions
 RUN mkdir -p ${WORK_DIR}
 WORKDIR ${WORK_DIR}
