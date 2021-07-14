@@ -12,4 +12,3 @@ Base of operations. A DevOps container based on alpine.
 - dig
 - git
 - jq
-- terraform
