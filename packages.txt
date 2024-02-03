@@ -1,0 +1,10 @@
+# essentials only
+groff
+bash
+bash-completion
+curl
+tar
+jq
+git
+docker-cli
+docker-cli-buildx
