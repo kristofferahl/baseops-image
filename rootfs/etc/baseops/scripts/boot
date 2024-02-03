@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+export BANNER="${BANNER:-baseops}"
+
+main() {
+  [[ -t 1 ]] && (($# == 0)) && exec bash --login
+}
+
+main "$@"

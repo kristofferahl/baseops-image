@@ -1,31 +1,52 @@
-FROM alpine:3.13.5
-LABEL maintainer="Kristoffer Ahl kristoffer.ahl@dotnetmentor.se"
+# Global args
+ARG ALPINE_VERSION=3.18.5
 
+# /*
+# base image
+# */
+FROM alpine:${ALPINE_VERSION}
+
+# Set args
+ARG TARGETARCH
+ARG BASEOPS_VERSION
+ARG BASEOPS_IMAGE
+
+# Use tmp as workdir
+WORKDIR /tmp/
+
+# Install packages as root
+USER root
+
+# Add alpine package manifest
+COPY packages.txt /etc/apk/
+
+# Install packages based on packages.txt
+RUN apk --no-cache add --update $(grep -h -v '^#' /etc/apk/packages.txt)
+
+# Install packages manually
+
+# figurine
+ARG FIGURINE_VERSION=1.3.0
+RUN curl -L https://github.com/arsham/figurine/releases/download/v${FIGURINE_VERSION}/figurine_linux_${TARGETARCH}_v${FIGURINE_VERSION}.tar.gz | tar -xzv -C . \
+  && cp deploy/figurine /usr/local/bin/figurine \
+  && rm -r deploy/figurine
+
+# Copy filesystem
+COPY rootfs/ /
+
+# Enable scripts
+RUN chmod +x /etc/baseops/scripts/boot
+RUN chmod +x /etc/baseops/scripts/packages
+ENV PATH="/etc/baseops/scripts:$PATH"
+
+# Set final workdir
 ARG WORK_DIR=/work/
-
-# misc
-RUN apk --no-cache add \
-  bash \
-  tar \
-  curl \
-  jq \
-  groff \
-  git \
-  docker \
-  docker-compose
-
-# dig
-ARG DIG_VERSION=9.10.2
-RUN curl -L https://github.com/sequenceiq/docker-alpine-dig/releases/download/v${DIG_VERSION}/dig.tgz | tar -xzv -C /usr/local/bin/
-
-# aws cli
-RUN apk add --no-cache python3 py3-pip \
-  && pip3 install --upgrade pip \
-  && pip3 install awscli \
-  && pip3 cache purge \
-  && rm -rf /var/cache/apk/*
-
-COPY ./baseops-versions /usr/local/bin/
-RUN chmod +x /usr/local/bin/baseops-versions
 RUN mkdir -p ${WORK_DIR}
 WORKDIR ${WORK_DIR}
+
+# Set env
+ENV BASEOPS_VERSION=$BASEOPS_VERSION
+ENV BASEOPS_IMAGE=$BASEOPS_IMAGE
+
+ENTRYPOINT ["/bin/bash"]
+CMD ["-c", "boot"]

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+declare -r divider="*************************************************************************"
+
+# BASE PACKAGES
+while read -r p; do
+  echo "package: ${p:?}"
+  echo "${divider:?}"
+  if command -v "${p:?}" >/dev/null; then
+    "${p:?}" --version || exit 1
+  else
+    echo "skipped check for ${p:?} as it is not installed"
+  fi
+  echo
+done <<<"$(grep -h -v '^#' /etc/apk/packages.txt)"

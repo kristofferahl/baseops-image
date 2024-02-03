@@ -4,10 +4,27 @@ declare -r git_tag="$(git describe --tags --abbrev=0)"
 declare -r head_count=$(git rev-list --count HEAD)
 declare -r tag_count=$(git rev-list --count "${git_tag:?}")
 declare -r count_diff=$((${head_count:?} - ${tag_count:?}))
-declare image_tag="${git_tag:?}"
+declare release_version="${git_tag:?}"
 
-[[ ${count_diff} -gt 0 ]] && image_tag+="-dev.${count_diff:?}"
-[[ -n $(git status -s) ]] && image_tag+="-dirty"
+[[ ${count_diff} -gt 0 || -n $(git status -s) ]] && release_version="sha-$(git rev-parse --short HEAD)-next"
+[[ ${count_diff} -gt 0 ]] && release_version+="-${count_diff:?}"
+[[ -n $(git status -s) ]] && release_version+="-dirty"
 
-echo "building tag ${image_tag:?}"
-docker buildx build --platform linux/amd64,linux/arm64 -t "kristofferahl/baseops:${image_tag:?}" "$@" . --push
+export BASEOPS_PLATFORMS="linux/arm64,linux/amd64"
+export BASEOPS_IMAGE="kristofferahl/baseops"
+export BASEOPS_VERSION="${release_version:?}"
+
+echo
+echo "Releasing image ${BASEOPS_IMAGE:?}:${BASEOPS_VERSION:?}"
+echo -n "Continue? [y/N]: " && read -r OK
+grep -iq "^y" <<<"${OK:-}" || exit 1
+
+echo "Setting up buildx builder..."
+if ! docker buildx use mpb-baseops &>/dev/null; then
+  docker buildx create --use --platform "${BASEOPS_PLATFORMS:?}" --name mpb-baseops
+  docker buildx inspect --bootstrap
+fi
+
+echo
+echo "Building image ${BASEOPS_IMAGE:?}:${BASEOPS_VERSION:?}..."
+docker buildx build --push --platform "${BASEOPS_PLATFORMS:?}" --build-arg "BASEOPS_IMAGE=${BASEOPS_IMAGE:?}" --build-arg="BASEOPS_VERSION=${BASEOPS_VERSION:?}" -t "${BASEOPS_IMAGE:?}:${BASEOPS_VERSION:?}" .

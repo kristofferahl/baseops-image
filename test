@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 
+# shellcheck disable=SC1091
+source ./release || exit 1
+
+echo
+echo "Running container ${BASEOPS_IMAGE:?}/${BASEOPS_VERSION:?} ... $*"
 docker run --rm -it \
+  -v "/${HOME:?}/.ssh/:/root/.ssh/" \
+  -v "/${PWD:?}:/work" \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  --entrypoint baseops-versions \
-  kristofferahl/baseops:latest
+  "${BASEOPS_IMAGE:?}:${BASEOPS_VERSION:?}" \
+  "${@}"
 
 echo "Exit code: $?"
